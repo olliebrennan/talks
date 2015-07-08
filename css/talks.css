@@ -1,0 +1,28 @@
+.footer .key {
+    position: relative;
+    bottom: 5px;
+    display: inline-block;
+    font: 30px monospace;
+    line-height: 30px;
+    width: 30px;
+    color: #000;
+    padding: 8px;
+    text-shadow: none;
+    letter-spacing: 0;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: rgba(0, 0, 0, 0.3) 0 2px 5px;
+    margin: 0px 7px;
+}
+
+.footer {
+    left: 0;
+    right: 0;
+    bottom: 100px;
+}
+
+.reveal section img.iconicLogo {
+    width: 300px;
+    height: 300px;
+    border: none;
+}
