@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>OllieBrennan - PHP Error / Exception Handling</title>
+
+    <meta name="description" content="PHP Error / Exception Handling">
+    <meta name="author" content="Ollie Brennan">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="/bower_components/reveal-js/css/reveal.min.css">
+    <link rel="stylesheet" href="/bower_components/reveal-js/css/theme/default.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="/bower_components/reveal-js/lib/css/zenburn.css">
+
+    <!-- Global Shared Styles -->
+    <link rel="stylesheet" href="/css/talks.css">
+
+    <!-- Local Styles -->
+    <link rel="stylesheet" href="/php-exceptions/css/exception.css">
+
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+        if( window.location.search.match( /print-pdf/gi ) ) {
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = 'bower_components/reveal-js/css/print/pdf.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+        }
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="/bower_components/reveal-js/lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section>
+            <h1 style="text-align: center;">PHP Exception Handling</h1>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+
+            <div class="footer footer-note">
+                Navigate with <span class="key">→</span> and <span class="key">↓</span>
+                <script>
+                    // Delicously hacky. Look away.
+                    if( navigator.userAgent.match( /(iPhone|iPad|iPod|Android)/i ) ) document.write(
+                        '<p style="color: rgba(0,0,0,0.3); text-shadow: none;">('+'Tap to navigate'+')</p>'
+                    );
+                </script>
+            </div>
+        </section>
+
+        <section  style="display: block;">
+            <h1 id="about">About Me</h1>
+            <h2 id="olliebrennan">Ollie Brennan</h2>
+
+            <img src="/images/the_iconic_logo.png" class="iconicLogo" />
+            <p>
+                Senior Software Engineer <br />
+                <strong>THE ICONIC</strong>
+            </p>
+
+            <p><small>
+                <a href="http://twitter.com/BrOllie" class="roll"><span data-title="@BrOllie">@BrOllie</span></a>
+                •
+                <a href="https://github.com/olliebrennan" class="roll"><span data-title="GitHub.com/olliebrennan">GitHub.com/olliebrennan</span></a>
+            </small></p>
+        </section>
+
+        <section>
+            <h2>Why am I doing this talk?</h2>
+            <p>&nbsp;</p>
+            <p>
+                Many of the concepts around Error and Exception handling are not fully understood or are ignored
+                by the community.
+            </p>
+            <p>&nbsp;</p>
+            <p>
+                <strong>Lets try to change that!</strong>
+            </p>
+        </section>
+
+        <!-- SECTION ONE -->
+        <section data-background="/php-exceptions/images/pisa.jpg">
+            <h2 class="background-text">Part1: Error Handling</h2>
+        </section>
+
+
+        <section>
+            <h2>What is error handling?</h2>
+            <p>
+                Error handling refers to the anticipation, detection, and resolution of programming, application, and
+                communications errors.
+            </p>
+            <p>&nbsp;</p>
+            <p class="fragment">
+                Specialized programs, called "error handlers", are available for some applications.
+            </p>
+        </section>
+        <section>
+            <h2>What is an error exactly?</h2>
+            <p>
+                An error is something that causes disruption to the normal flow of a computer program.
+            </p>
+
+            <aside class="notes">
+                Not just normal notices / warnings, but also user triggered errors
+            </aside>
+        </section>
+        <section>
+            <h2>Error Severity</h2>
+
+            <p>
+                <strong class="background-text">E_ERROR</strong> - Fatal run-time errors.  These cannot be recovered from, such as memory allocation problem. Execution of the script is halted.
+            </p>
+            <p>
+                <strong class="background-text">E_WARNING</strong> - Run-time warnings (non-fatal errors). Execution of the script is not halted
+            </p>
+            <p>
+                <strong class="background-text">E_NOTICE</strong> - Run-time notices.  Indicate that the script encounted something that could indicate an error, but could also happen in the normal course of running a script.
+            </p>
+            <p>
+                <strong class="background-text">E_STRICT</strong> - Enable to have PHP suggest changes to your code which will ensure the best interoperability and forward compatibility of your code.
+            </p>
+            <p>
+                <small>
+                    <a href="http://php.net/manual/en/errorfunc.constants.php">
+                        http://php.net/manual/en/errorfunc.constants.php
+                    </a>
+                </small>
+            </p>
+        </section>
+        <section>
+            <h2>Non-fatal example</h2>
+            <pre><code>
+&lt;?php
+$x = 1;
+
+echo "Result: " . $x + $y; // 1
+?&gt;
+            </code></pre>
+
+            <pre><code>
+# PHP Notice: Undefined variable: y in /path/to/test.php on line 4
+# PHP Stack trace:
+# PHP   1. {main}() /Users/ollie/test.php:0
+            </code></pre>
+
+            <aside class="notes">
+                PHP will continue without any problem here.  For those from 'exception-heavy' languages this can
+                be confusing but is one of PHPs selling points.
+            </aside>
+
+        </section>
+        <section>
+            <h2>Fatal example</h2>
+            <pre><code>
+&lt;?php
+function call_method($obj) {
+    $obj->method();
+}
+
+call_method(null); // oops!
+?&gt;
+            </code></pre>
+
+            <pre><code>
+# Fatal error: Call to a member function method() on a non-object
+# in /path/file.php on line 6
+            </code></pre>
+        </section>
+        <section>
+            <h2>Error Suppression</h2>
+            <p>Yes, you can suppress errors &nbsp;ಠ_ಠ</p>
+            <pre><code>
+&lt;?php
+@fopen($file);
+?&gt;
+            </code></pre>
+
+            <h3 class="fragment">OR</h3>
+            <pre class="fragment"><code>
+&lt;?php
+if (file_exists($file)) {
+    fopen($file);
+}
+else {
+    die('File not found');
+}
+?&gt;
+            </code></pre>
+
+        </section>
+        <section>
+            <h2>Development Settings</h2>
+            <p>Turn it ALL on. If you want to build forward compatible code, you want all the information you can get</p>
+            <pre><code>
+&lt;?php
+// Logs everything
+error_reporting(E_ALL);
+
+// Shows all errors to screen
+ini_set('display_errors', 1);
+?&gt;
+            </code></pre>
+
+            <p>
+                - Get warned of deprecated code<br />
+                - Get warned of notices<br />
+                - Get warned on potential bugs<br />
+                - etc
+            </p>
+
+            <aside class="notes">
+                - If you use <=PHP5.4 you should use error_reporting(E_ALL | E_STRICT). E_STRICT was absorbed into PHP5.5<br />
+            </aside>
+        </section>
+        <section>
+            <h2>Production Settings</h2>
+            <p>Log everything, but keep displaying of errors off*</p>
+            <pre><code>
+&lt;?php
+// Logs everything except deprecated notices
+error_reporting(E_ALL & ~E_DEPRECATED);
+
+// Shows no errors
+ini_set('display_errors', 0);
+?&gt;
+            </code></pre>
+        </section>
+
+
+        <!-- SECTION TWO -->
+        <section data-background="/php-exceptions/images/stop.jpg">
+            <h2 class="background-text">Part2: Exception Handling</h2>
+        </section>
+
+        <section>
+            <h2>What is an exception</h2>
+            <p>&nbsp;</p>
+            <p class="background-text">An exception is an <strong>object</strong> that can be thrown, and caught within PHP</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p><small><a href="http://php.net/manual/en/language.exceptions.php">http://php.net/manual/en/language.exceptions.php</a></small></p>
+        </section>
+        <section>
+            <h1>Golden Rule</h1>
+            <p>Michael Nitschinger defines their use perfectly</p>
+
+            <p class="background-text">
+                "Use for what their name says: exceptional situations.
+                Don't use exceptions to control the flow of your application logic
+                (like substituting if-statements or to control loops)"
+            </p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p><small><a href="http://nitschinger.at/A-primer-on-PHP-exceptions">http://nitschinger.at/A-primer-on-PHP-exceptions</a></small></p>
+        </section>
+        <section>
+            <h2>To Clarify</h2>
+            <p>
+                Can your code continue along a normal path?<br /><br />
+                - If so, do not use an exception (e.g. form validation).<br />
+                - If not, throw one (e.g. Unable to Connect to DB)
+            </p>
+        </section>
+        <section>
+            <h2>History of exceptions in PHP</h2>
+            <p class="fragment">PHP5 - First implemented</p>
+            <p class="fragment">PHP5.1 - SPL library of exceptions introduced</p>
+            <p class="fragment">PHP5.3 - Exception Nesting</p>
+            <p class="fragment">PHP5.5 - Finally keyword added</p>
+            <aside class="notes">
+                Exception Nesting - Throwing exception, creating a new exception object and referencing the original in it. Allows caller
+                to access both exceptions.
+            </aside>
+        </section>
+        <section>
+            <h2>Anatomy of an Exception</h2>
+            <pre><code>
+public __construct (
+    [ string $message = ""
+    [, int $code = 0
+    [, Exception $previous = NULL ]]]
+)
+            </code></pre>
+
+            <pre><code>
+throw new Exception(
+    'An error occurred',
+    500,
+    new Exception('A previous error occurred')
+);
+            </code></pre>
+
+            <aside class="notes">
+                No parameters are required, but I strongly suggest you add a useful error message.
+            </aside>
+        </section>
+        <section>
+            <h2>Syntax example (1/3)</h2>
+            <pre><code class="php">
+&lt;?php
+try {
+    throw Exception('An error occurred');
+} catch (Exception $e) {
+    echo 'Caught exception: ' . $e->getMessage();
+}
+
+// Caught exception: An error occurred
+            </code></pre>
+        </section>
+
+        <section>
+            <h2>Syntax example (2/3)</h2>
+            <pre><code class="php">
+&lt;?php
+try {
+    throw Exception('An error occurred');
+} catch (Exception $e) {
+    echo 'Caught exception: ' . $e->getMessage();
+} finally {
+    echo 'Finally print this';
+}
+
+// Caught exception: An error occurred
+// Finally print this
+            </code></pre>
+
+            <aside class="notes">
+                PHP5.5 the 'finally' keyword was introduced<br />
+                Finally will always run regardless of exception being thrown or not
+            </aside>
+        </section>
+        <section>
+            <h2>Syntax example (3/3)</h2>
+            <h3>Interestingly...</h3>
+            <pre><code class="php">
+&lt;?php
+try {
+    throw Exception('An error occurred');
+} finally {
+    echo 'Finally print this';
+}
+
+// Finally print this
+// Fatal error: Uncaught exception 'Exception' with message 'An error occurred'
+            </code></pre>
+            <p>
+                <small>
+                    <a href="https://wiki.php.net/rfc/finally#proposal">https://wiki.php.net/rfc/finally#proposal</a>
+                </small>
+            </p>
+
+            <aside class="notes">
+                - Interestingly, you can also use try-finally blocks without any catch block.<br />
+                - Only available in >=PHP5.5.0<br /><br />
+                - When an exception is thrown, all subsequent code will cease to be ran until your exception is
+                caught (bubbling). If you do not catch an exception, your script will terminate with a ‘Fatal error’.
+            </aside>
+        </section>
+
+        <section>
+            <h2>Exceptions are objects</h2>
+            <p>
+                Although common practice: you do not have to throw exceptions right away.<br /><br />
+                Treat them as objects, attach additional information as needed*
+            </p>
+
+            <pre><code ckass="php">
+&lt;?php
+
+    $exception = new Exception('An error occurred');
+    $exception->timestamp = time();
+    $exception->username = 'Admin';
+
+    throw $exception;
+
+?>
+                </code></pre>
+            <p><small>*useful to add custom logging information to your apps</small></p>
+
+            <aside class="notes">
+                - Worth noting, exceptions are objects and best used with OOP. You "can" use them with
+                procedural programming, but the value it would provide is debatable.
+            </aside>
+        </section>
+        <section>
+            <h2>What is “\Exception"</h2>
+            <p>Using namespaces? <br />Exception is the top of the exception hierachy</p>
+            <pre><code>
+&lt;?php
+namespace myNamespace;
+
+class foo {
+    function bar() {
+        throw new \Exception(‘An error occurred’);
+    }
+}
+            </code></pre>
+        </section>
+        <section>
+            <h2>SPL Exceptions</h2>
+            <p>
+                SPL provides a set of standard Exceptions for your use.
+            </p>
+            <pre><code>
+                Exception
+                    |- BadFunctionCallException implements Exception
+                    |- BadMethodCallException extends Exception
+                    |- DomainException extends Exception
+                    |- InvalidArgumentException extends Exception
+                    |- ...
+                    |- UnexpectedValueException
+            </code></pre>
+
+            <p>
+                <a href="http://devzone.zend.com/1075/the-standard-php-library-spl/#section4-1"><small>
+                    http://devzone.zend.com/1075/the-standard-php-library-spl/#section4-1
+                </small></a>
+            </p>
+            <aside class="notes">
+                - SPL - Standard PHP Library<br />
+                - Catching \Exception is not enough. It becomes impossible to dictate multiple alternative behaviours for
+                an application depending on the type of failure.
+            </aside>
+        </section>
+        <section>
+            <h2>Exception Abstraction</h2>
+            <p>To give your code meaning, create your own exceptions and only catch what you need to</p>
+            <pre><code>
+&lt;?php
+
+class DidNotRsvpException extends DomainException {}
+
+try {
+    throw new DidNotRsvpException('SydPHPer did not RSVP');
+} catch (DidNotRsvpException ($e) {
+    echo 'UhOh: ' . $e->getMessage();
+}
+
+// UhOh: Member did not RSVP
+            </code></pre>
+        </section>
+
+        <section>
+            <h2>Exception Bubbling</h2>
+            <p>Catch your custom exceptions</p>
+            <pre><code data-trim>
+try {
+    throw new DidNotRsvpException('SydPHPer did not RSVP');
+} catch (DidNotRsvpException ($e) {
+    echo 'UhOh: ' . $e->getMessage(); // UhOh: Member did not RSVP
+}
+            </code></pre>
+
+            <pre class="fragment"><code data-trim>
+try {
+    throw new DidNotRsvpException('SydPHPer did not RSVP');
+} catch (DomainException ($e) {
+    echo 'UhOh: ' . $e->getMessage(); // UhOh: Member did not RSVP
+}
+            </code></pre>
+
+            <pre class="fragment"><code data-trim>
+try {
+    throw new DidNotRsvpException('SydPHPer did not RSVP');
+} catch (Exception ($e) {
+    echo 'UhOh: ' . $e->getMessage(); // UhOh: Member did not RSVP
+}
+            </code></pre>
+            <p>
+                <span class="fragment">
+                    <strong>DidNotRsvpException</strong>
+                </span>
+                <span class="fragment">
+                    extends<br /> <strong>DomainException</strong>
+                </span>
+                <span class="fragment">
+                    extends<br /> <strong>Exception</strong>
+                </span>
+            </p>
+        </section>
+
+        <section>
+            <h2>Default Exception Handlers</h2>
+            <p>
+                - Catch exceptions that bubble all the way up to top scope<br />
+                - Execution will stop after the exception_handler is called<br />
+                - Useful for displaying 500 pages or adding custom logging<br />
+            </p>
+        </section>
+        <section>
+            <h2>Default Exception Handlers</h2>
+            <pre><code>
+&lt;?php
+
+function exception_handler($exception) {
+    echo "Uncaught exception: " $exception->getMessage();
+}
+
+set_exception_handler('exception_handler');
+
+throw new Exception('Uncaught Exception');
+echo "Not Executed";
+            </code></pre>
+
+            <pre><code>
+// Uncaught exception: Uncaught Exception
+            </code></pre>
+            <p>
+                <small>
+                    <a href="http://php.net/set_exception_handler">http://php.net/set_exception_handler</a>
+                </small>
+            </p>
+        </section>
+
+        <!-- SECTION THREE -->
+        <section data-background="/php-exceptions/images/telefoon.jpg">
+            <h2 class="background-text">Part3: Best Practices</h2>
+            <p>&nbsp;</p>
+            <p class="background-text">
+                <strong>Feel free to disagree!</strong>
+            </p>
+        </section>
+
+        <section>
+            <h2>Never throw \Exception</h2>
+            <p>The global namespace is too generic.<br />Use custom namespaced exceptions (MyCustomException).</p>
+        </section>
+        <section>
+            <h2>But you may throw SPL exceptions</h2>
+            <p>SPL exceptions are more domain specific and provide a level of abstraction over the global exception namespace.</p>
+        </section>
+        <section>
+            <h2>Never catch \Exception</h2>
+            <p class="fragment">Not quite true, but only catch it in your default error handlers, not in normal program execution.</p>
+        </section>
+        <section>
+            <h2>Always Extend SPL</h2>
+            <p>SPL provides a level of built in abstraction which \Exception does not</p>
+            <p>&nbsp;</p>
+            <p>I would recommend extending SPL from any custom exceptions</p>
+
+            <pre><code class="php">
+&lt;?php
+
+class DidNotRsvpException extends DomainException {} // GOOD
+
+class DidNotRsvpException extends Exception () // BAD
+            </code></pre>
+        </section>
+
+
+        <section>
+            <h2>Create a Hierarchy</h2>
+            <p>
+                There is nothing wrong with this
+            </p>
+            <pre><code>
+                Exception
+                |- LogicException
+                    |- MyPackageException
+                        |- MySubComponentException
+                            |- MyFileHandlerException
+            </code></pre>
+            <p>&nbsp;</p>
+            <p class="fragment">
+                Plan your exception hierarchy and follow that plan
+            </p>
+        </section>
+
+
+        <section>
+            <h2>Honor Layer Abstraction</h2>
+            <p>Do not let custom logic bubble up too far.<br />Catch and rethrow as appropriate</p>
+            <pre><code>
+&lt?php
+try {
+    // some PDO action here
+} catch(PDOException $pdoE) {
+    throw new ControllerException(
+        'There was an error: ' . $pdoE->getMessage(),
+        null,
+        $pdoE // note nesting of $pdoE
+    );
+}
+            </code></pre>
+            <p class="fragment">
+                If the PDO exception is caused by your controller, allowing the PDO exception to bubble up
+                would be a violation of layer of abstraction
+            </p>
+            <p class="fragment">
+                <small>
+                    Brandon Savage said so:
+                    <a href="https://www.brandonsavage.net/exceptional-php-introduction-to-exceptions/">
+                        https://www.brandonsavage.net/exceptional-php-introduction-to-exceptions/
+                    </a>
+                </small>
+            </p>
+        </section>
+        <section>
+            <h2>Leaky Abstraction</h2>
+            <p>
+                "Details of your model leak out when you throw a custom exception that is uncaught requiring the
+                underlying software to understand your underlying systems"
+            </p>
+            <p>&nbsp;</p>
+            <p class="fragment">
+                Extend generic exceptions and/or SPL exceptions to mitigate (DatabaseQueryException extends ModelStorageException extends LogicException)
+            </p>
+            <p>&nbsp;</p>
+            <p class="fragment">
+                <small>
+                    <a href="https://en.wikipedia.org/wiki/Leaky_abstraction">
+                        https://en.wikipedia.org/wiki/Leaky_abstraction
+                    </a>
+                </small>
+            </p>
+            <aside class="notes">
+                - Coined by Joel Spolsky<br />
+                - LAW - "All non-trivial abstractions, to some degree, are leaky."<br />
+                - Details and limitations of the implementation leak through
+            </aside>
+        </section>
+        <section>
+            <h2>Exceptions are meant to be handled</h2>
+            <p>The idea of OOP is that you throw exceptions in exceptional circumstances & also catch them.</p>
+            <p>&nbsp;</p>
+            <p>Just because you can ignore them, does not mean you should</p>
+
+            <aside class="notes">
+                - Enhance user experience by not letting exceptions bubble up<br />
+            </aside>
+        </section>
+        <section>
+            <h2>Exceptions are here to help you tidy up</h2>
+            <pre><code class="php">
+$db = new PDO($dsn, $user, $password);
+$db->beginTransaction();
+
+try {
+    $db->exec("delete from table");
+    $db->exec("insert into tabletwo");
+    $db->commit();
+} catch (PDOException $e) {
+    $db->rollBack();
+}
+            </code></pre>
+            <aside class="notes">
+                - Remember, you can roll back DB transactions, cleanup files, send emails (and more) by catching and
+                resolving exceptions.
+            </aside>
+        </section>
+        <section>
+            <h2>Exceptions should be informative</h2>
+            <p>Self explanatory but: <br />give exception messages as much information as possible</p>
+
+            <pre><code class="php">
+throw new DidNotRsvpException('User present but did not RSVP'); // GOOD
+
+throw new DidNotRsvpException('Error'); // BAD
+            </code></pre>
+        </section>
+        <section>
+            <h2>Exceptions are not meant to be silenced</h2>
+            <pre><code class="php">
+try {
+    throw new DidNotRsvpException('User present but did not RSVP');
+} catch (DidNotRsvpException $e) {
+    // Do nothing
+}
+            </code></pre>
+            <p>If done incorrectly I guarantee one day someone will curse your name</p>
+            <aside class="notes">
+                - Usually done because developer us unable to fix so just hides the error.<br />
+                - There is the odd exception, when the exception has been completely handled.
+            </aside>
+        </section>
+        <section>
+            <h1>The ICONIC in production</h1>
+            <p>
+                We fail and show a maintenance page on ALL errors <br />(including warnings excluding deprecated)
+            </p>
+            <p>&nbsp;</p>
+            <p>
+                Probably not good practice because it breaks the user experience BUT all issues are fixed very quickly
+            </p>
+        </section>
+
+        <!-- SECTION FOUR -->
+        <section data-background="/php-exceptions/images/roadbird.jpg">
+            <h2 class="background-text">Part4: PHP7</h2>
+            <p>&nbsp;</p>
+            <p class="background-text">
+                <strong>YAY!</strong>
+            </p>
+        </section>
+
+        <section>
+            <h2>Exceptions in the engine (1/2)</h2>
+            <p>Exceptions in the engine coverts many fatal and recoverable fatal errors into exceptions.</p>
+            <pre><code>
+&lt;?php
+function call_method($obj) {
+    $obj->method();
+}
+
+call_method(null); // oops!
+?&gt;
+            </code></pre>
+
+            <pre><code>
+# Fatal error: Call to a member function method() on a non-object
+# in /path/file.php on line 6
+            </code></pre>
+
+        </section>
+
+        <section>
+            <h2>Exceptions in the engine (2/2)</h2>
+            <p>Exceptions in the engine coverts many fatal and recoverable fatal errors into exceptions.</p>
+            <div>
+                <pre><code>
+&lt;?php
+try {
+    call_method(null); // oops!
+} catch (EngineException $e) {
+    echo "Exception: {$e->getMessage()}\n";
+}
+?&gt;
+                </code></pre>
+
+                <pre><code>
+# Exception: Call to a member function method() on a non-object
+                </code></pre>
+            </div>
+
+            <aside class="notes">
+                - Fatal errors will still be thrown as currently (E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR)<br />
+                - If an exception is not caught, PHP will continue to throw the same fatal errors as it currently does<br />
+                - More info, checkout the RFC @ https://wiki.php.net/rfc/engine_exceptions_for_php7<br />
+                - How do we differentiate between an Error or exception? See next slide.<br />
+                - NOTE: EngineException is not a valid exception, but is from the RFC
+            </aside>
+        </section>
+
+        <section>
+            <h2>New Exception Hierarchy</h2>
+            <p>&nbsp;</p>
+            <pre><code>
+                interface Throwable
+                    |- Exception implements Throwable
+                        |- ...
+                    |- Error implements Throwable
+                        |- TypeError extends Error
+                        |- ParseError extends Error
+                        |- AssertionError extends Error
+            </code></pre>
+            <p>&nbsp;</p>
+            <p>
+                Implemented to allow for backward compatibility. <br /> You do not want PHP5.x code catching these new
+                "Errors" with unexpected consequences.
+            </p>
+
+            <aside class="notes">
+                - You cannot throw your own Errors :-)
+            </aside>
+        </section>
+
+        <section>
+            <h2>Throwable Interface</h2>
+            <p>
+                A new "Throwable" interface which allows for a class to be "thrown" has been implemented.
+            </p>
+            <p>&nbsp;</p>
+            <p>
+                May not be used in userland, therefore all user exceptions must extend Exception accordingly.
+            </p>
+            <p>&nbsp;</p>
+            <pre><code>
+&lt;?php
+    class Exception implements Throwable {}
+?&gt;
+            </code></pre>
+        </section>
+
+
+
+        <section>
+            <h2>Bringing it all together</h2>
+            <p>&nbsp;</p>
+            <pre><code>
+&lt;?php
+function add(int $left, int $right) {
+    return $left + $right;
+}
+
+try {
+    echo add('left', 'right');
+} catch (Exception $e) {
+    // Handle exception
+} catch (Error $e) { // Clearly a different type of object
+    // Log error and end gracefully
+} catch (Throwable $e) {
+    // Will catch any throwable class (Exception or Error)
+}
+            </code></pre>
+
+            <aside class="notes">
+                It is discouraged that you catch Error objects exception for logging or cleanup purposes as Error
+                objects represent coding problems that should be fixed rather than runtime conditions that may be handled.<br />
+                <br />
+                Note, the Throwable in this case will not do anything.
+            </aside>
+        </section>
+
+        <!-- END -->
+        <section data-background="/php-exceptions/images/plane.jpg">
+            <h2 class="background-text">Questions?</h2>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+
+            <div class="background-text">
+                Images courtesy of <a href="https://unsplash.com/">https://unsplash.com/</a>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="/bower_components/reveal-js/lib/js/head.min.js"></script>
+<script src="/bower_components/reveal-js/js/reveal.min.js"></script>
+
+<script>
+
+    // Full list of configuration options available here:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+            { src: '/bower_components/reveal-js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+            { src: '/bower_components/reveal-js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: '/bower_components/reveal-js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: '/bower_components/reveal-js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+            { src: '/bower_components/reveal-js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+            { src: '/bower_components/reveal-js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+    });
+
+</script>
+
+</body>
+</html>
