@@ -34,12 +34,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:olliebrennan/olliebrennan.github.io.git"
+    "url": "git@github.com:olliebrennan/talks.git"
   },
   "author": "Ollie Brennan <ollie@epicarena.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/olliebrennan/olliebrennan.github.io/issues"
+    "url": "https://github.com/olliebrennan/talks/issues"
   },
-  "homepage": "https://github.com/olliebrennan/olliebrennan.github.io"
+  "homepage": "https://github.com/olliebrennan/talks"
 }

@@ -71,11 +71,10 @@ module.exports = function(grunt) {
                 'css/**/*.css',
                 'images/**/*',
                 'backgrounds/**/*',
-                'bower_components/**',
+                'bower_components/**/*',
                 'index.html',
-                'mobile/network-performance/**/*',
-                'devtools/**/*',
-                'misc/revealjs-ghpages/**/*'
+                'php-exceptions/**/*',
+                'sydphp/**/*',
             ]
         },
 
